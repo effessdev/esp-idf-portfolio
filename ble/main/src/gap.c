@@ -8,13 +8,19 @@
 #include "common.h"
 #include "gatt_svc.h"
 
-/* Private function declarations */
+/* ========================================================================== *
+ * PRIVATE FUNCTION DECLARATIONS
+ * ========================================================================== */
+
 inline static void format_addr(char *addr_str, uint8_t addr[]);
 static void print_conn_desc(struct ble_gap_conn_desc *desc);
 static void start_advertising(void);
 static int gap_event_handler(struct ble_gap_event *event, void *arg);
 
-/* Private variables */
+/* ========================================================================== *
+ * PRIVATE VARIABLES
+ * ========================================================================== */
+
 static uint8_t own_addr_type;
 static uint8_t addr_val[6] = {0};
 static uint8_t esp_uri[] = {BLE_GAP_URI_PREFIX_HTTPS,
@@ -34,7 +40,10 @@ static uint8_t esp_uri[] = {BLE_GAP_URI_PREFIX_HTTPS,
                             'o',
                             'm'};
 
-/* Private functions */
+/* ========================================================================== *
+ * PRIVATE FUNCTIONs
+ * ========================================================================== */
+
 inline static void format_addr(char *addr_str, uint8_t addr[]) {
   sprintf(addr_str, "%02X:%02X:%02X:%02X:%02X:%02X", addr[0], addr[1], addr[2],
           addr[3], addr[4], addr[5]);
@@ -285,7 +294,10 @@ static int gap_event_handler(struct ble_gap_event *event, void *arg) {
   return rc;
 }
 
-/* Public functions */
+/* ========================================================================== *
+ * PUBLIC FUNCTIONS
+ * ========================================================================== */
+
 void adv_init(void) {
   /* Local variables */
   int rc = 0;
