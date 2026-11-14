@@ -6,6 +6,8 @@
 #include "esp_wifi.h"
 #include "nvs_flash.h"
 
+#include "sdkconfig.h" // To access values defined in the sdkconfig file
+
 static const char *TAG = "wifi_station";
 
 // Runs when Wi-Fi and IP events occurs
@@ -76,8 +78,8 @@ void app_main(void) {
   wifi_config_t wifi_config = {
       .sta =
           {
-              .ssid = "I'll add this later",
-              .password = "I'll add this later",
+              .ssid = CONFIG_WIFI_SSID,
+              .password = CONFIG_WIFI_PASSWORD,
               .threshold.authmode = WIFI_AUTH_WPA2_PSK,
           },
   };

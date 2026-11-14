@@ -9,6 +9,10 @@ There are two modes. For example:
 
 We use **STA (Station) mode** in this project. It is the most important mode since most times your ESP32 needs to connect to the internet.
 
+## Before building
+
+Set Wi-Fi SSID and password using Menuconfig.
+
 ## Steps to implement WiFi Station
 
 ### Step 1: Initialize NVS Flash.

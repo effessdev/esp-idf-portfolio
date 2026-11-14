@@ -1,0 +1,15 @@
+menu "Wi-Fi Configuration"
+
+    config WIFI_SSID
+        string "WiFi SSID"
+        default "Enter_SSID_Here"
+        help
+            The SSID (name) of your Wi-Fi router.
+
+    config WIFI_PASSWORD
+        string "WiFi Password"
+        default "Enter_Password_Here"
+        help
+            The password for your Wi-Fi router.
+
+endmenu
