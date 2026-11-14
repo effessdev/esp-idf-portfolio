@@ -44,5 +44,5 @@ void app_main(void) {
               .threshold.authmode = WIFI_AUTH_WPA2_PSK,
           },
   };
-  ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config))
+  ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
 }
