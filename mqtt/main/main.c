@@ -19,7 +19,7 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base,
                                int32_t event_id, void *event_data);
 
 // Runs when Wi-Fi and IP events occurs
-static void event_handler(
+static void wifi_event_handler(
     void *arg,                   // Set to NULL if not needed
     esp_event_base_t event_base, // category of the event
     int32_t event_id,            // specific event within that category
@@ -136,14 +136,14 @@ void app_main(void) {
   // ======================================
 
   ESP_ERROR_CHECK(esp_event_handler_instance_register(
-      WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL, NULL));
+      WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_event_handler, NULL, NULL));
 
   // ESP_EVENT_ANY_ID registers events with any ID, including
   // WIFI_EVENT_STA_START and WIFI_EVENT_STA_DISCONNECTED. We currently
   // only handle these two events in the event_handler.
 
   ESP_ERROR_CHECK(esp_event_handler_instance_register(
-      IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, NULL, NULL));
+      IP_EVENT, IP_EVENT_STA_GOT_IP, &wifi_event_handler, NULL, NULL));
 
   ESP_ERROR_CHECK(esp_wifi_start());
   ESP_LOGI(TAG, "Wi-Fi station started. Attempting connection...");
