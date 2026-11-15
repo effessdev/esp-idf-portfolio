@@ -24,9 +24,9 @@ static void mqtt_publisher_task(void *pvParameters) {
 
   while (1) {
     snprintf(payload, sizeof(payload), "25.%d", count++ % 10);
-    // Publish mock temperature data to esp32/temperature topic
+    // Publish mock temperature data to effessdev-esp32/temperature topic
     esp_mqtt_client_publish(
-        client, "esp32/temperature", payload,
+        client, "effessdev-esp32/temperature", payload,
         0, // Length of the payload in bytes (0 tells the function to
            // calculate it automatically using strlen())
         0, // QoS level (learn more on README.md)
