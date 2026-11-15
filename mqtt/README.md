@@ -34,3 +34,21 @@ This is the most common authentication security mode (even though newer standard
 - WPA2 (Wi-Fi Protected Access 2): It means that we encrypt the data sent over the air so no one can eavesdrop on your traffic.
 
 - PSK (Pre-Shared Key): This means it uses a standard password (the Wi-Fi passphrase you type in) that is shared between the router and your device to authenticate the connection.
+
+## MQTT
+
+### QoS (Quality of Service levels)
+
+- QoS 0 (At most once): "Fire and forget." The message is sent once with no acknowledgment. If the network drops, the message is lost.
+
+- QoS 1 (At least once): Guaranteed delivery. The sender retransmits the message until it receives an acknowledgment (PUBACK). This can result in duplicate messages.
+
+- QoS 2 (Exactly once): Slowest and safest. Uses a four-step handshake to ensure the message arrives one and only one time without duplicates.
+
+### Retain flag
+
+The retain flag tells the MQTT broker to save the last published message for a specific topic.
+
+- Retain = 1: The broker stores the message. When a new client subscribes to the topic later, the broker immediately sends them this last saved message.
+
+- Retain = 0: The broker does not store the message. New subscribers get nothing until the device publishes a new one.

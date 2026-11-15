@@ -6,9 +6,17 @@
 #include "esp_wifi.h"
 #include "nvs_flash.h"
 
+// MQTT related
+#include "mqtt_client.h"
+// end MQTT related
+
 #include "sdkconfig.h" // To access values defined in the sdkconfig file
 
 static const char *TAG = "wifi_station";
+static esp_mqtt_client_handle_t client = NULL;
+
+static void mqtt_event_handler(void *handler_args, esp_event_base_t base,
+                               int32_t event_id, void *event_data);
 
 // Runs when Wi-Fi and IP events occurs
 static void event_handler(
@@ -41,6 +49,44 @@ static void event_handler(
     // printf or ESP_LOGI.
     // even->ip_info.ip is the ip address itself. `&` gives the pointer
     // (memory address) to it.
+
+    if (client == NULL) {
+      esp_mqtt_client_config_t mqtt_cfg = {
+          .broker.address.uri = "mqtt://broker.hivemq.com",
+      };
+      client = esp_mqtt_client_init(&mqtt_cfg);
+
+      esp_mqtt_client_register_event(client, ESP_EVENT_ANY_ID,
+                                     mqtt_event_handler, NULL);
+      esp_mqtt_client_start(client);
+    }
+  }
+}
+
+// Runs when an MQTT event occurs
+static void mqtt_event_handler(void *handler_args, esp_event_base_t base,
+                               int32_t event_id, void *event_data) {
+  esp_mqtt_event_handle_t event = event_data;
+
+  switch ((esp_mqtt_event_id_t)event_id) {
+  case MQTT_EVENT_CONNECTED:
+    ESP_LOGI(TAG, "MQTT_EVENT_CONNECTED");
+
+    // Publish mock temperature data to esp32/temperature topic
+    esp_mqtt_client_publish(
+        client, "esp32/temperature", "25.5",
+        0, // Length of the payload in bytes (0 tells the function to
+           // calculate it automatically using strlen())
+        0, // QoS level (learn more on README.md)
+        1  // Retain flag (learn more on README.md)
+    );
+
+    break;
+  case MQTT_EVENT_DISCONNECTED:
+    ESP_LOGI(TAG, "MQTT_EVENT_DISCONNECTED");
+    break;
+  default:
+    break;
   }
 }
 
