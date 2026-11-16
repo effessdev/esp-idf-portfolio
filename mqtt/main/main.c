@@ -68,6 +68,11 @@ static void wifi_event_handler(
     // even->ip_info.ip is the ip address itself. `&` gives the pointer
     // (memory address) to it.
 
+    // ----------------------------------------
+
+    // As you can see from the code below, we don't need to pass in
+    // anything related to the Wi-Fi we just set up to set up MQTT.
+
     if (client == NULL) {
       esp_mqtt_client_config_t mqtt_cfg = {
           .broker.address.uri = "mqtt://broker.hivemq.com",
