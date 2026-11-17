@@ -6,7 +6,8 @@
 #include "esp_wifi.h"
 #include "nvs_flash.h"
 
-// MQTT related
+// MQTT related (mqtt component must be added to idf_component.yml so it is
+// downloaded to the managed_components folder)
 #include "mqtt_client.h"
 // end MQTT related
 
@@ -70,8 +71,8 @@ static void wifi_event_handler(
 
     // ----------------------------------------
 
-    // As you can see from the code below, we don't need to pass in
-    // anything related to the Wi-Fi we just set up to set up MQTT.
+    // We don't need to pass in anything related to the Wi-Fi we just set
+    // up to set up MQTT.
 
     if (client == NULL) {
       esp_mqtt_client_config_t mqtt_cfg = {
@@ -128,6 +129,13 @@ void app_main(void) {
   ESP_ERROR_CHECK(esp_netif_init());                // Requires esp_netif.h
   ESP_ERROR_CHECK(esp_event_loop_create_default()); // Requires esp_event.h
   esp_netif_create_default_wifi_sta();              // Requires esp_wifi.h
+
+  // esp_netif is the Network Interface abstraction component in ESP-IDF
+  // that sits between the TCP/IP stack (such as LwIP) and underlying
+  // network drivers (such as Wi-Fi station, AP, or Ethernet).
+
+  // The default event loop handles not only Wi-Fi, but Bluetooth, OTA
+  // events, and custom app events.
 
   // ======================================
   // Step: Initialize the Wi-Fi Driver and Set Configuration
