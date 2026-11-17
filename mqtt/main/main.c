@@ -177,6 +177,23 @@ void app_main(void) {
   // default event loop queue. We just registered handlers for the events
   // we care about. We can also send events to the default event loop queue
   // using esp_event_loop_post().
+  // Syntax:
+  // ESP_ERROR_CHECK(esp_event_post(MY_CUSTOM_EVENT_BASE, MY_EVENT_ID,
+  //                                &my_data, sizeof(my_data),
+  //                                portMAX_DELAY));
+  // portMAX_DELAY is a FreeRTOS macro that evaluates to the maximum
+  // possible value of type TickType_t (typically 0xffffffffUL on 32-bit
+  // systems). It's a very large value.
+  // When passed as a timeout argument to FreeRTOS blocking functions (such
+  // as xQueueSend, xSemaphoreTake, or esp_event_post), it instructs the
+  // calling task to wait indefinitely (block forever) until the operation
+  // succeeds or the resource becomes available, rather than timing out
+  // after a specific duration.
+
+  // The default event loop is a general-purpose dispatcher. You can use it
+  // for any custom application logic, such as inter-task communication,
+  // sensor data notifications, button press events, or custom component
+  // states, without needing to create a separate event loop.
 
   ESP_ERROR_CHECK(esp_wifi_start());
   ESP_LOGI(TAG, "Wi-Fi station started. Attempting connection...");
