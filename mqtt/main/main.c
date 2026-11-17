@@ -136,6 +136,9 @@ void app_main(void) {
 
   // The default event loop handles not only Wi-Fi, but Bluetooth, OTA
   // events, and custom app events.
+  // It internally maintains an event queue, which is fully encapsulated
+  // and we cannot use it directly. We can register event handlers (we will
+  // do it below). We can also send events as well.
 
   // ======================================
   // Step: Initialize the Wi-Fi Driver and Set Configuration
@@ -169,6 +172,11 @@ void app_main(void) {
 
   ESP_ERROR_CHECK(esp_event_handler_instance_register(
       IP_EVENT, IP_EVENT_STA_GOT_IP, &wifi_event_handler, NULL, NULL));
+
+  // Things like the Wi-Fi driver and LwIP TCP/IP stack sends events to the
+  // default event loop queue. We just registered handlers for the events
+  // we care about. We can also send events to the default event loop queue
+  // using esp_event_loop_post().
 
   ESP_ERROR_CHECK(esp_wifi_start());
   ESP_LOGI(TAG, "Wi-Fi station started. Attempting connection...");
