@@ -89,3 +89,24 @@ The retain flag tells the MQTT broker to save the last published message for a s
 - Retain = 1: The broker stores the message. When a new client subscribes to the topic later, the broker immediately sends them this last saved message.
 
 - Retain = 0: The broker does not store the message. New subscribers get nothing until the device publishes a new one.
+
+## `esp_event_loop_post()`
+
+Syntax:
+
+```c
+ESP_ERROR_CHECK(esp_event_post(MY_CUSTOM_EVENT_BASE, MY_EVENT_ID,
+                               &my_data, sizeof(my_data),
+                               portMAX_DELAY));
+```
+
+- **`portMAX_DELAY`**: A FreeRTOS macro that evaluates to the maximum possible value of type `TickType_t` (typically `0xffffffffUL` on 32-bit systems). When passed as a timeout argument to FreeRTOS blocking functions (such as `xQueueSend`, `xSemaphoreTake`, or `esp_event_post`), it instructs the calling task to wait indefinitely (block forever) until the operation succeeds or the resource becomes available, rather than timing out after a specific duration.
+
+### Use Cases
+
+The default event loop is a general-purpose dispatcher. You can use it for any custom application logic without needing to create a separate event loop, including:
+
+- Inter-task communication
+- Sensor data notifications
+- Button press events
+- Custom component states
