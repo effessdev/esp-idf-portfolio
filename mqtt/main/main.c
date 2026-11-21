@@ -14,9 +14,6 @@
 static const char *TAG = "wifi_station";
 static esp_mqtt_client_handle_t client = NULL;
 
-static void mqtt_event_handler(void *handler_args, esp_event_base_t base,
-                               int32_t event_id, void *event_data);
-
 static void mqtt_publisher_task(void *pvParameters) {
   char payload[32];
   int count = 0;
@@ -32,6 +29,27 @@ static void mqtt_publisher_task(void *pvParameters) {
         1  // Retain flag (learn more on README.md)
     );
     vTaskDelay(5000 / portTICK_PERIOD_MS);
+  }
+}
+
+// Runs when an MQTT event occurs
+static void mqtt_event_handler(void *handler_args, esp_event_base_t base,
+                               int32_t event_id, void *event_data) {
+  // esp_mqtt_event_handle_t event = event_data;
+
+  switch ((esp_mqtt_event_id_t)event_id) {
+  case MQTT_EVENT_CONNECTED:
+    ESP_LOGI(TAG, "MQTT_EVENT_CONNECTED");
+
+    xTaskCreate(mqtt_publisher_task, "mqtt_publisher_task", 2048, NULL, 1,
+                NULL);
+
+    break;
+  case MQTT_EVENT_DISCONNECTED:
+    ESP_LOGI(TAG, "MQTT_EVENT_DISCONNECTED");
+    break;
+  default:
+    break;
   }
 }
 
@@ -82,27 +100,6 @@ static void wifi_event_handler(
                                      mqtt_event_handler, NULL);
       esp_mqtt_client_start(client);
     }
-  }
-}
-
-// Runs when an MQTT event occurs
-static void mqtt_event_handler(void *handler_args, esp_event_base_t base,
-                               int32_t event_id, void *event_data) {
-  // esp_mqtt_event_handle_t event = event_data;
-
-  switch ((esp_mqtt_event_id_t)event_id) {
-  case MQTT_EVENT_CONNECTED:
-    ESP_LOGI(TAG, "MQTT_EVENT_CONNECTED");
-
-    xTaskCreate(mqtt_publisher_task, "mqtt_publisher_task", 2048, NULL, 1,
-                NULL);
-
-    break;
-  case MQTT_EVENT_DISCONNECTED:
-    ESP_LOGI(TAG, "MQTT_EVENT_DISCONNECTED");
-    break;
-  default:
-    break;
   }
 }
 
