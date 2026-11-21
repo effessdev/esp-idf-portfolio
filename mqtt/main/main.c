@@ -1,6 +1,7 @@
 #include "esp_event.h"
 #include "esp_log.h"
 #include "esp_netif.h"
+#include "esp_random.h"
 #include "esp_wifi.h"
 #include "nvs_flash.h"
 
@@ -16,19 +17,25 @@ static esp_mqtt_client_handle_t client = NULL;
 
 static void mqtt_publisher_task(void *pvParameters) {
   char payload[32];
-  int count = 0;
 
   while (1) {
-    snprintf(payload, sizeof(payload), "25.%d", count++ % 10);
-    // Publish mock temperature data to effessdev-esp32/temperature topic
-    esp_mqtt_client_publish(
-        client, "effessdev-esp32/temperature", payload,
-        0, // Length of the payload in bytes (0 tells the function to
-           // calculate it automatically using strlen())
-        0, // QoS level (learn more on README.md)
-        1  // Retain flag (learn more on README.md)
-    );
-    vTaskDelay(5000 / portTICK_PERIOD_MS);
+    if (client != NULL &&
+        esp_mqtt_client_get_state(client) == MQTT_CLIENT_STATE_CONNECTED) {
+
+      // Mock temperature reading (25.0 to 25.9)
+      int random_temp = esp_random() % 10;
+      snprintf(payload, sizeof(payload), "25.%d", random_temp);
+
+      // Publish mock temperature data
+      int msg_id = esp_mqtt_client_publish(
+          client, "effessdev-esp32/temperature", payload, 0, 0, 1);
+
+      if (msg_id < 0) {
+        ESP_LOGE(TAG, "Failed to publish temperature");
+      }
+    }
+
+    vTaskDelay(pdMS_TO_TICKS(5000));
   }
 }
 
@@ -40,16 +47,12 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base,
   switch ((esp_mqtt_event_id_t)event_id) {
   case MQTT_EVENT_CONNECTED:
     ESP_LOGI(TAG, "MQTT_EVENT_CONNECTED");
-
-    xTaskCreate(mqtt_publisher_task, "mqtt_publisher_task", 2048, NULL, 1,
-                NULL);
-
     break;
   case MQTT_EVENT_DISCONNECTED:
     ESP_LOGI(TAG, "MQTT_EVENT_DISCONNECTED");
-    // Unlike Wi-Fi, you don't need to call any reconnection function here!
-    // ESP-MQTT has it own automatic reconnection mechanism.
-    // Just esp_mqtt_client_start(client); is enough.
+    // Unlike Wi-Fi, you don't need to manually reconnect here.
+    // ESP-MQTT has its own automatic reconnection mechanism,
+    // which is enabled by default after calling esp_mqtt_client_start().
     break;
   default:
     break;
@@ -105,9 +108,10 @@ static void wifi_event_handler(
       };
       client = esp_mqtt_client_init(&mqtt_cfg);
 
-      esp_mqtt_client_register_event(client, ESP_EVENT_ANY_ID,
-                                     mqtt_event_handler, NULL);
-      esp_mqtt_client_start(client);
+      ESP_ERROR_CHECK(esp_mqtt_client_register_event(
+          client, ESP_EVENT_ANY_ID, mqtt_event_handler, NULL));
+
+      ESP_ERROR_CHECK(esp_mqtt_client_start(client));
     }
   }
 }
@@ -185,4 +189,11 @@ void app_main(void) {
 
   ESP_ERROR_CHECK(esp_wifi_start());
   ESP_LOGI(TAG, "Wi-Fi station started. Attempting connection...");
+
+  // ======================================
+  // Step: Start the publisher task
+  // ======================================
+
+  xTaskCreate(mqtt_publisher_task, "mqtt_publisher_task", 2048, NULL, 1,
+              NULL);
 }
