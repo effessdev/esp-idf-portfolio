@@ -47,6 +47,9 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base,
     break;
   case MQTT_EVENT_DISCONNECTED:
     ESP_LOGI(TAG, "MQTT_EVENT_DISCONNECTED");
+    // Unlike Wi-Fi, you don't need to call any reconnection function here!
+    // ESP-MQTT has it own automatic reconnection mechanism.
+    // Just esp_mqtt_client_start(client); is enough.
     break;
   default:
     break;
@@ -67,7 +70,11 @@ static void wifi_event_handler(
   } else if (event_base == WIFI_EVENT &&
              event_id == WIFI_EVENT_STA_DISCONNECTED) {
     esp_wifi_connect();
-    ESP_LOGI(TAG, "Connect to the AP failed");
+    ESP_LOGI(
+        TAG,
+        "Wi-Fi disconnected. Attempting to reconnect. If the connection "
+        "fails again, another WIFI_EVENT_STA_DISCONNECTED "
+        "event will trigger another reconnection attempt.");
   } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
     // Convert the event_data to the correct type (since it's a generic
     // pointer by default)
@@ -89,6 +96,8 @@ static void wifi_event_handler(
 
     // We don't need to pass in anything related to the Wi-Fi we just set
     // up to set up MQTT.
+    // Let's create a client and start it (only if it hasn't been created
+    // yet)
 
     if (client == NULL) {
       esp_mqtt_client_config_t mqtt_cfg = {
